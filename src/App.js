@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./index.css";
 
 const App = () => {
@@ -22,6 +22,22 @@ const App = () => {
       isEditing: false,
     },
   ]);
+
+  const focusTodoInput = useRef();
+
+  useEffect(() => {
+    function focusInput(e) {
+      if (e.ctrlKey && e.keyCode === 191) {
+        e.preventDefault();
+        focusTodoInput.current.focus();
+      }
+    }
+    document.addEventListener("keydown", focusInput);
+
+    return () => {
+      document.removeEventListener("keydown", focusInput);
+    };
+  }, []);
 
   const [todoId, setTodoId] = useState(4);
 
@@ -115,7 +131,8 @@ const App = () => {
                 className="rounded-md w-full"
                 value={todo}
                 onChange={updateUserInput}
-                placeholder="What do you need to complete...? (Press '/' to focus)"
+                placeholder="What do you need to complete...? (Press 'Ctrl + /' to focus)"
+                ref={focusTodoInput}
               />
             </form>
           </header>
