@@ -37,7 +37,20 @@ const App = () => {
     setTodoId((prevTodoId) => prevTodoId + 1);
   };
 
-  const handleChange = () => {};
+  const handleChange = (e, id) => {
+    const { name, value, checked } = e.target;
+    setTodos((prevTodos) => {
+      return prevTodos.map((todo) => {
+        if (todo.id === id) {
+          return {
+            ...todo,
+            [name]: name === "completed" ? checked : value,
+          };
+        }
+        return todo;
+      });
+    });
+  };
 
   return (
     <div>
@@ -71,7 +84,8 @@ const App = () => {
                     type="checkbox"
                     className="rounded-md px-2 py-2 cursor-pointer"
                     value={todo.completed}
-                    onChange={handleChange}
+                    name="completed"
+                    onChange={(e) => handleChange(e, todo.id)}
                   />
                   <div className="flex-1 px-4 py-1">{todo.body}</div>
                   <span className="cursor-pointer text-2xl text-red-400 hover:text-red-500">
