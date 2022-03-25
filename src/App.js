@@ -136,7 +136,9 @@ const App = () => {
                   />
                   {!todo.isEditing ? (
                     <div
-                      className="flex-1 px-4 py-1"
+                      className={`flex-1 px-4 py-1 ${
+                        todo.completed ? "line-through text-gray-400" : ""
+                      }`}
                       onDoubleClick={() => enableEditing(todo.id)}
                     >
                       {todo.body}
