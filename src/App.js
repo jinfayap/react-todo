@@ -95,6 +95,10 @@ const App = () => {
     }
   };
 
+  const deleteTodo = (id) => {
+    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+  };
+
   return (
     <div>
       <h1 className="text-center font-bold text-3xl">Todo List Application</h1>
@@ -148,7 +152,10 @@ const App = () => {
                       name="body"
                     />
                   )}
-                  <span className="cursor-pointer text-2xl text-red-400 hover:text-red-500">
+                  <span
+                    className="cursor-pointer text-2xl text-red-400 hover:text-red-500"
+                    onClick={() => deleteTodo(todo.id)}
+                  >
                     &times;
                   </span>
                 </li>
