@@ -23,7 +23,13 @@ const App = () => {
     },
   ]);
 
+  const [todoId, setTodoId] = useState(4);
+
+  const [todo, setTodo] = useState("");
+
   const focusTodoInput = useRef();
+
+  const [filter, setFilter] = useState("all");
 
   useEffect(() => {
     function focusInput(e) {
@@ -39,9 +45,15 @@ const App = () => {
     };
   }, []);
 
-  const [todoId, setTodoId] = useState(4);
-
-  const [todo, setTodo] = useState("");
+  const todoFiltered = () => {
+    if (filter === "all") {
+      return todos;
+    } else if (filter === "active") {
+      return todos.filter((todo) => !todo.completed);
+    } else if (filter === "completed") {
+      return todos.filter((todo) => todo.completed);
+    }
+  };
 
   const updateUserInput = (e) => {
     setTodo((prevTodo) => e.target.value);
@@ -115,6 +127,10 @@ const App = () => {
     setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
   };
 
+  const clearCompleted = () => {
+    setTodos((prevTodos) => prevTodos.filter((todo) => !todo.completed));
+  };
+
   return (
     <div>
       <h1 className="text-center font-bold text-3xl">Todo List Application</h1>
@@ -139,7 +155,7 @@ const App = () => {
 
           <div className="mt-4">
             <ul className="space-y-4 border border-black rounded-md px-2 py-2 divide-y">
-              {todos.map((todo) => (
+              {todoFiltered().map((todo) => (
                 <li
                   key={todo.id}
                   className="flex justify-around items-center  border-black px-2 py-1 "
@@ -147,7 +163,7 @@ const App = () => {
                   <input
                     type="checkbox"
                     className="rounded-md px-2 py-2 cursor-pointer"
-                    value={todo.completed}
+                    checked={todo.completed}
                     name="completed"
                     onChange={(e) => handleChange(e, todo.id)}
                   />
@@ -184,19 +200,37 @@ const App = () => {
 
           <footer className="mt-4 flex justify-between items-start">
             <div className="space-x-2">
-              <span className="border px-2 py-1 rounded-md border-black cursor-pointer">
+              <span
+                className={`px-2 py-1 rounded-md border-black cursor-pointer ${
+                  filter === "all" ? "border" : ""
+                }`}
+                onClick={() => setFilter("all")}
+              >
                 All
               </span>
-              <span className="px-2 py-1 rounded-md border-black cursor-pointer">
+              <span
+                className={`px-2 py-1 rounded-md border-black cursor-pointer ${
+                  filter === "active" ? "border" : ""
+                }`}
+                onClick={() => setFilter("active")}
+              >
                 Active
               </span>
-              <span className="px-2 py-1 rounded-md border-black cursor-pointer">
+              <span
+                className={`px-2 py-1 rounded-md border-black cursor-pointer ${
+                  filter === "completed" ? "border" : ""
+                }`}
+                onClick={() => setFilter("completed")}
+              >
                 Completed
               </span>
             </div>
 
             <div>
-              <span className="border px-2 py-1 rounded-md border-black cursor-pointer">
+              <span
+                className="border px-2 py-1 rounded-md border-black cursor-pointer"
+                onClick={clearCompleted}
+              >
                 Clear Completed
               </span>
             </div>
