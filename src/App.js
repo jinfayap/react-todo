@@ -7,16 +7,19 @@ const App = () => {
       id: 1,
       body: "Task 1",
       completed: false,
+      isEditing: false,
     },
     {
       id: 2,
       body: "Task 2",
       completed: false,
+      isEditing: false,
     },
     {
       id: 3,
       body: "Task 3",
       completed: false,
+      isEditing: false,
     },
   ]);
 
@@ -50,6 +53,46 @@ const App = () => {
         return todo;
       });
     });
+  };
+
+  const enableEditing = (id) => {
+    setTodos((prevTodos) =>
+      prevTodos.map((todo) =>
+        todo.id === id ? { ...todo, isEditing: true } : todo
+      )
+    );
+  };
+
+  const disableEditing = (id) => {
+    setTodos((prevTodos) =>
+      prevTodos.map((todo) =>
+        todo.id === id ? { ...todo, isEditing: false } : todo
+      )
+    );
+  };
+
+  const updateTodo = (e, id) => {
+    if (e.key === "Enter") {
+      const { name, value } = e.target;
+
+      if (value.trim() === "") return disableEditing(id);
+
+      setTodos((prevTodos) => {
+        return prevTodos.map((todo) => {
+          if (todo.id === id) {
+            return {
+              ...todo,
+              [name]: value,
+            };
+          }
+          return todo;
+        });
+      });
+
+      disableEditing(id);
+    } else if (e.key === "Escape") {
+      disableEditing(id);
+    }
   };
 
   return (
@@ -87,7 +130,24 @@ const App = () => {
                     name="completed"
                     onChange={(e) => handleChange(e, todo.id)}
                   />
-                  <div className="flex-1 px-4 py-1">{todo.body}</div>
+                  {!todo.isEditing ? (
+                    <div
+                      className="flex-1 px-4 py-1"
+                      onDoubleClick={() => enableEditing(todo.id)}
+                    >
+                      {todo.body}
+                    </div>
+                  ) : (
+                    <input
+                      type="text"
+                      className="flex-1 px-4 py-1 ml-1 rounded h-full"
+                      defaultValue={todo.body}
+                      autoFocus
+                      onKeyDown={(e) => updateTodo(e, todo.id)}
+                      onBlur={() => disableEditing(todo.id)}
+                      name="body"
+                    />
+                  )}
                   <span className="cursor-pointer text-2xl text-red-400 hover:text-red-500">
                     &times;
                   </span>
