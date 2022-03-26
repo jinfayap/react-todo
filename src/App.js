@@ -2,28 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import "./index.css";
 
 const App = () => {
-  const [todos, setTodos] = useState([
-    {
-      id: 1,
-      body: "Task 1",
-      completed: false,
-      isEditing: false,
-    },
-    {
-      id: 2,
-      body: "Task 2",
-      completed: false,
-      isEditing: false,
-    },
-    {
-      id: 3,
-      body: "Task 3",
-      completed: false,
-      isEditing: false,
-    },
-  ]);
-
-  const [todoId, setTodoId] = useState(4);
+  const [todos, setTodos] = useState(
+    JSON.parse(localStorage.getItem("todos")) || []
+  );
 
   const [todo, setTodo] = useState("");
 
@@ -45,6 +26,10 @@ const App = () => {
     };
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+  }, [todos]);
+
   const todoFiltered = () => {
     if (filter === "all") {
       return todos;
@@ -63,9 +48,11 @@ const App = () => {
     e.preventDefault();
     if (todo.trim() === "") return;
 
-    setTodos((prevTodos) => [...prevTodos, { id: todoId, body: todo }]);
+    setTodos((prevTodos) => [
+      ...prevTodos,
+      { id: new Date(), body: todo, isEditing: false, completed: false },
+    ]);
     setTodo("");
-    setTodoId((prevTodoId) => prevTodoId + 1);
   };
 
   const handleChange = (e, id) => {
@@ -99,28 +86,32 @@ const App = () => {
     );
   };
 
-  const updateTodo = (e, id) => {
+  const evaluateToUpdate = (e, id) => {
     if (e.key === "Enter") {
-      const { name, value } = e.target;
-
-      if (value.trim() === "") return disableEditing(id);
-
-      setTodos((prevTodos) => {
-        return prevTodos.map((todo) => {
-          if (todo.id === id) {
-            return {
-              ...todo,
-              [name]: value,
-            };
-          }
-          return todo;
-        });
-      });
-
-      disableEditing(id);
+      updateTodo(e, id);
     } else if (e.key === "Escape") {
       disableEditing(id);
     }
+  };
+
+  const updateTodo = (e, id) => {
+    const { name, value } = e.target;
+
+    if (value.trim() === "") return disableEditing(id);
+
+    setTodos((prevTodos) => {
+      return prevTodos.map((todo) => {
+        if (todo.id === id) {
+          return {
+            ...todo,
+            [name]: value,
+          };
+        }
+        return todo;
+      });
+    });
+
+    disableEditing(id);
   };
 
   const deleteTodo = (id) => {
@@ -182,8 +173,8 @@ const App = () => {
                       className="flex-1 px-4 py-1 ml-1 rounded h-full"
                       defaultValue={todo.body}
                       autoFocus
-                      onKeyDown={(e) => updateTodo(e, todo.id)}
-                      onBlur={() => disableEditing(todo.id)}
+                      onKeyDown={(e) => evaluateToUpdate(e, todo.id)}
+                      onBlur={(e) => updateTodo(e, todo.id)}
                       name="body"
                     />
                   )}
