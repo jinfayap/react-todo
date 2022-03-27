@@ -1,122 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./index.css";
+import TodoInput from "./components/TodoInput";
+import TodoList from "./components/TodoList";
+import TodoFooter from "./components/TodoFooter";
 
 const App = () => {
   const [todos, setTodos] = useState(
     JSON.parse(localStorage.getItem("todos")) || []
   );
 
-  const [todo, setTodo] = useState("");
-
-  const focusTodoInput = useRef();
-
   const [filter, setFilter] = useState("all");
-
-  useEffect(() => {
-    function focusInput(e) {
-      if (e.ctrlKey && e.keyCode === 191) {
-        e.preventDefault();
-        focusTodoInput.current.focus();
-      }
-    }
-    document.addEventListener("keydown", focusInput);
-
-    return () => {
-      document.removeEventListener("keydown", focusInput);
-    };
-  }, []);
 
   useEffect(() => {
     localStorage.setItem("todos", JSON.stringify(todos));
   }, [todos]);
-
-  const todoFiltered = () => {
-    if (filter === "all") {
-      return todos;
-    } else if (filter === "active") {
-      return todos.filter((todo) => !todo.completed);
-    } else if (filter === "completed") {
-      return todos.filter((todo) => todo.completed);
-    }
-  };
-
-  const updateUserInput = (e) => {
-    setTodo((prevTodo) => e.target.value);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (todo.trim() === "") return;
-
-    setTodos((prevTodos) => [
-      ...prevTodos,
-      { id: new Date(), body: todo, isEditing: false, completed: false },
-    ]);
-    setTodo("");
-  };
-
-  const handleChange = (e, id) => {
-    const { name, value, checked } = e.target;
-    setTodos((prevTodos) => {
-      return prevTodos.map((todo) => {
-        if (todo.id === id) {
-          return {
-            ...todo,
-            [name]: name === "completed" ? checked : value,
-          };
-        }
-        return todo;
-      });
-    });
-  };
-
-  const enableEditing = (id) => {
-    setTodos((prevTodos) =>
-      prevTodos.map((todo) =>
-        todo.id === id ? { ...todo, isEditing: true } : todo
-      )
-    );
-  };
-
-  const disableEditing = (id) => {
-    setTodos((prevTodos) =>
-      prevTodos.map((todo) =>
-        todo.id === id ? { ...todo, isEditing: false } : todo
-      )
-    );
-  };
-
-  const evaluateToUpdate = (e, id) => {
-    if (e.key === "Enter") {
-      updateTodo(e, id);
-    } else if (e.key === "Escape") {
-      disableEditing(id);
-    }
-  };
-
-  const updateTodo = (e, id) => {
-    const { name, value } = e.target;
-
-    if (value.trim() === "") return disableEditing(id);
-
-    setTodos((prevTodos) => {
-      return prevTodos.map((todo) => {
-        if (todo.id === id) {
-          return {
-            ...todo,
-            [name]: value,
-          };
-        }
-        return todo;
-      });
-    });
-
-    disableEditing(id);
-  };
-
-  const deleteTodo = (id) => {
-    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
-  };
 
   const clearCompleted = () => {
     setTodos((prevTodos) => prevTodos.filter((todo) => !todo.completed));
@@ -128,104 +25,17 @@ const App = () => {
 
       <main className="container mt-4">
         <div className="max-w-4xl mx-auto border border-black rounded-lg px-6 py-6">
-          <header>
-            <h2 className="font-semibold text-2xl text-center mb-2">
-              Add a new Todo
-            </h2>
-            <form onSubmit={handleSubmit}>
-              <input
-                type="text"
-                className="rounded-md w-full"
-                value={todo}
-                onChange={updateUserInput}
-                placeholder="What do you need to complete...? (Press 'Ctrl + /' to focus)"
-                ref={focusTodoInput}
-              />
-            </form>
-          </header>
+          <TodoInput setTodos={setTodos} />
 
           <div className="mt-4">
-            <ul className="space-y-4 border border-black rounded-md px-2 py-2 divide-y">
-              {todoFiltered().map((todo) => (
-                <li
-                  key={todo.id}
-                  className="flex justify-around items-center  border-black px-2 py-1 "
-                >
-                  <input
-                    type="checkbox"
-                    className="rounded-md px-2 py-2 cursor-pointer"
-                    checked={todo.completed}
-                    name="completed"
-                    onChange={(e) => handleChange(e, todo.id)}
-                  />
-                  {!todo.isEditing ? (
-                    <div
-                      className={`flex-1 px-4 py-1 ${
-                        todo.completed ? "line-through text-gray-400" : ""
-                      }`}
-                      onDoubleClick={() => enableEditing(todo.id)}
-                    >
-                      {todo.body}
-                    </div>
-                  ) : (
-                    <input
-                      type="text"
-                      className="flex-1 px-4 py-1 ml-1 rounded h-full"
-                      defaultValue={todo.body}
-                      autoFocus
-                      onKeyDown={(e) => evaluateToUpdate(e, todo.id)}
-                      onBlur={(e) => updateTodo(e, todo.id)}
-                      name="body"
-                    />
-                  )}
-                  <span
-                    className="cursor-pointer text-2xl text-red-400 hover:text-red-500"
-                    onClick={() => deleteTodo(todo.id)}
-                  >
-                    &times;
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <TodoList filter={filter} setTodos={setTodos} todos={todos} />
           </div>
 
-          <footer className="mt-4 flex justify-between items-start">
-            <div className="space-x-2">
-              <span
-                className={`px-2 py-1 rounded-md border-black cursor-pointer ${
-                  filter === "all" ? "border" : ""
-                }`}
-                onClick={() => setFilter("all")}
-              >
-                All
-              </span>
-              <span
-                className={`px-2 py-1 rounded-md border-black cursor-pointer ${
-                  filter === "active" ? "border" : ""
-                }`}
-                onClick={() => setFilter("active")}
-              >
-                Active
-              </span>
-              <span
-                className={`px-2 py-1 rounded-md border-black cursor-pointer ${
-                  filter === "completed" ? "border" : ""
-                }`}
-                onClick={() => setFilter("completed")}
-              >
-                Completed
-              </span>
-            </div>
-
-            <div>
-              <span
-                className="border px-2 py-1 rounded-md border-black cursor-pointer"
-                onClick={clearCompleted}
-              >
-                Clear Completed
-              </span>
-            </div>
-          </footer>
+          <TodoFooter
+            filter={filter}
+            setFilter={setFilter}
+            clearCompleted={clearCompleted}
+          />
         </div>
       </main>
     </div>
