@@ -75,47 +75,53 @@ const TodoList = ({ todos, setTodos, filter }) => {
   };
 
   return (
-    <ul className="space-y-4 border border-black rounded-md px-2 py-2 divide-y">
-      {todoFiltered().map((todo) => (
-        <li
-          key={todo.id}
-          className="flex justify-around items-center  border-black px-2 py-1 "
-        >
-          <input
-            type="checkbox"
-            className="rounded-md px-2 py-2 cursor-pointer"
-            checked={todo.completed}
-            name="completed"
-            onChange={(e) => handleChange(e, todo.id)}
-          />
-          {!todo.isEditing ? (
-            <div
-              className={`flex-1 px-4 py-1 ${
-                todo.completed ? "line-through text-gray-400" : ""
-              }`}
-              onDoubleClick={() => enableEditing(todo.id)}
+    <ul className="space-y-4 border-black rounded-md px-2 py-2 divide-y">
+      {todoFiltered().length > 0 ? (
+        <>
+          {todoFiltered().map((todo) => (
+            <li
+              key={todo.id}
+              className="flex justify-around items-center  border-black px-2 py-1 "
             >
-              {todo.body}
-            </div>
-          ) : (
-            <input
-              type="text"
-              className="flex-1 px-4 py-1 ml-1 rounded h-full"
-              defaultValue={todo.body}
-              autoFocus
-              onKeyDown={(e) => evaluateToUpdate(e, todo.id)}
-              onBlur={(e) => updateTodo(e, todo.id)}
-              name="body"
-            />
-          )}
-          <span
-            className="cursor-pointer text-2xl text-red-400 hover:text-red-500"
-            onClick={() => deleteTodo(todo.id)}
-          >
-            &times;
-          </span>
-        </li>
-      ))}
+              <input
+                type="checkbox"
+                className="rounded-md px-2 py-2 cursor-pointer"
+                checked={todo.completed}
+                name="completed"
+                onChange={(e) => handleChange(e, todo.id)}
+              />
+              {!todo.isEditing ? (
+                <div
+                  className={`flex-1 px-4 py-1 ${
+                    todo.completed ? "line-through text-gray-400" : ""
+                  }`}
+                  onDoubleClick={() => enableEditing(todo.id)}
+                >
+                  {todo.body}
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  className="flex-1 px-4 py-1 ml-1 rounded h-full"
+                  defaultValue={todo.body}
+                  autoFocus
+                  onKeyDown={(e) => evaluateToUpdate(e, todo.id)}
+                  onBlur={(e) => updateTodo(e, todo.id)}
+                  name="body"
+                />
+              )}
+              <span
+                className="cursor-pointer text-2xl text-red-400 hover:text-red-500"
+                onClick={() => deleteTodo(todo.id)}
+              >
+                &times;
+              </span>
+            </li>
+          ))}
+        </>
+      ) : (
+        <p>No {filter === "all" ? "" : filter} todos found...</p>
+      )}
     </ul>
   );
 };
